@@ -1,0 +1,47 @@
+<!-- Minimal template used with all other HTML docs -->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link type="text/css"
+          rel="stylesheet"
+          href="/static/main.css">
+    <title>Blog</title>
+</head>
+
+<body>
+    {% if not user %}
+
+        <div class="top-row">
+            <a href="/blog/login"
+               class="left-align button">
+                Login
+            </a>
+            <a href="/signup"
+               class="left-align button">
+                Signup
+            </a>
+        </div>
+
+    {% else %}
+
+        <div class="top-row">
+            <a href="/blog/logout"
+               class="left-align button">Logout</a>
+            <p class="logged-user">
+                {{user.username}} is logged in.
+            </p>
+        </div>
+
+    {% endif %}
+
+    <h1><a class="button title"
+           href="/blog">-->BLOG<--</a></h1>
+
+    {% block content %}
+    {% endblock %}
+
+</body>
+
+</html>
+

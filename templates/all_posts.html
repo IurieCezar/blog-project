@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="title">
+    <a class="button"
+       href="/blog/newpost">
+        Write a post
+    </a>
+</div>
+<br>
+<hr>
+<hr>
+
+{% for content in contents %}
+
+<div class="single-post">
+    <div class="heading">
+        <a href="/blog/{{content.key().id()}}"
+           class="buttons">
+            <em>Subject:</em> {{content.subject}}&nbsp;|||
+            <em>Author:</em> {{content.author}}
+        </a>
+        <div class="opac created">
+            {{content.created.strftime("%b %d, %Y")}}
+        </div>
+    </div>
+    <hr>
+    <div class="content">
+        {{content.content}}
+    </div>
+    <div align = "right">
+        {% if user.username == content.author %}
+
+            <a href="/blog/{{content.key().id()}}/editpost"
+               class="button">
+                Edit post
+            <a>
+            <a href="/blog/{{content.key().id()}}/deletepost"
+               class="button">
+                Delete post
+            </a>
+
+        {% else %}
+
+            {% if user.username not in content.liked_by %}
+
+                <a href="/blog/{{content.key().id()}}/like"
+                   class="button">
+                    Like post
+                </a>
+
+            {% else %}
+
+                <a href="/blog/{{content.key().id()}}/unlike"
+                   class="button">
+                    Unlike post
+                </a>
+
+            {% endif %}
+
+        {% endif %}
+        <p class="opac">
+            Number of likes: {{content.likes}}&nbsp;&nbsp;
+        </p>
+    </div>
+    <label>
+        Write a comment:
+    </label>
+    <form method="post"
+          action="/blog/{{content.key().id()}}/comment">
+        <textarea name="comment"
+                  class="comment">
+            {{comment}}
+        </textarea>
+        <br>
+        <input type="submit"
+               value="Post Comment">
+    </form>
+    <div class="comments">
+        {% for comment in comments %}
+
+            {% if comment.post_id == content.key().id() %}
+
+                <div>Comment:</div>
+                <div>
+                    {{comment.comment}}
+                </div>
+                <p class="opac">
+                    by: {{comment.commenter}}
+                    <br>
+                    on: {{comment.created.strftime("%b %d, %Y")}}
+                </p>
+                {% if user.username == comment.commenter%}
+
+                    <!-- URLs on a single line for more readability -->
+                    <a href="/blog/{{content.key().id()}}/editcomment/{{comment.key().id()}}"
+                       class="buttons">
+                        &nbsp;&nbsp;Edit Comment
+                    </a>
+                    <form method="POST"
+                          action="/blog/{{content.key().id()}}/deletecomment/{{comment.key().id()}}">
+                        <input name="com_id"
+                               type="hidden"
+                               value="{{comment.com_id}}">
+                        <input type="hidden"
+                               name="commenter_id"
+                               value="{{comment.commenter_id}}">
+                        <input name="post_id"
+                               type="hidden"
+                               value="{{comment.post_id}}">
+                        <input type="submit"
+                               value="Delete Comment"
+                               class="buttons">
+                    </form>
+
+                {% endif %}
+        <hr>
+        <hr>
+
+            {% endif %}
+
+        {% endfor %}
+    </div>
+</div>
+
+{% endfor %}
+
+{% endblock %}
+

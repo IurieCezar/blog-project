@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>LOGIN</h2>
+Please enter your username and password:
+<form method="post">
+    <table>
+        <tr>
+            <td>
+                <input type="text"
+                       name="username"
+                       value="{{username}}"
+                       placeholder="username">
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <input type="password"
+                       name="password"
+                       value=""
+                       placeholder="password">
+            </td>
+        </tr>
+        <tr>
+            <td class="error">
+                {{login_error}}
+            </td>
+        </tr>
+    </table>
+    <input type="submit"
+           value="Submit"
+           class="button">
+</form>
+
+{% endblock %}

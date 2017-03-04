@@ -1,0 +1,35 @@
+{% extends "base.html"%}
+
+{% block content %}
+
+    <div class="single-post">
+        <div class="heading">
+            <div class="subject">
+                <em>Subject:</em> {{subject}}
+                <br>
+                <em>Author:</em> {{author}}
+            </div>
+            <div class="created">
+                {{created.strftime("%b %d, %Y")}}
+            </div>
+            <hr>
+        </div class="content">
+            <p>
+                {{content}}
+            </p>
+        </div>
+        <label>Edit comment:</label>
+        <form method="post">
+            <textarea class="comment" name="comment">{{comment}}</textarea>
+            <div class="error">{{error}}</div>
+            <input type="submit"
+                   value="Submit"
+                   class="buttons">|||
+            <a href="/blog/{{post_id}}"
+               class="buttons">
+                Cancel Edit
+            </a>
+        </form>
+    </div>
+
+{% endblock %}
