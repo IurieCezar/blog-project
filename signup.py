@@ -549,7 +549,6 @@ class EditComment(Handler):
 
 
 # URI routes stored by the WSGIApplication
-# Keep routes on a single line(>80 chars) for more readability
 app = webapp2.WSGIApplication([("/signup", Signup),
                                ("/blog/login", Login),
                                ("/blog", HomePage),
