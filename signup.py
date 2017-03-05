@@ -547,7 +547,6 @@ class EditComment(Handler):
             time.sleep(0.1)
             self.redirect("/blog/%s" % str(post_id))
 
-
 # URI routes stored by the WSGIApplication
 app = webapp2.WSGIApplication([("/signup", Signup),
                                ("/blog/login", Login),
