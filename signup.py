@@ -16,16 +16,17 @@ from google.appengine.ext import db
 # Create Jinja environment
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir),
-                               autoescape = True)
+                               autoescape=True)
 
 secret = 'udacity_is_great!!!'
+
 
 # Password hashing functions:
 def make_salt():
     return ''.join(random.choice(string.letters) for x in xrange(5))
 
 
-def make_pw_hash(name, password, salt = None):
+def make_pw_hash(name, password, salt=None):
     if not salt:
         salt = make_salt()
     h = hashlib.sha256(name + password + salt).hexdigest()
@@ -47,6 +48,7 @@ def check_secure_val(secure_val):
     if secure_val == make_secure_val(val):
         return val
 
+
 def render_str(template, **params):
     t = jinja_env.get_template(template)
     return t.render(params)
@@ -54,18 +56,24 @@ def render_str(template, **params):
 
 # Regex functions:
 USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
+
+
 def valid_username(username):
-  return username and USER_RE.match(username)
+    return username and USER_RE.match(username)
 
 
 PASSWORD_RE = re.compile(r"^.{3,20}$")
+
+
 def valid_password(password):
-  return password and PASSWORD_RE.match(password)
+    return password and PASSWORD_RE.match(password)
 
 
 EMAIL_RE = re.compile(r"^[\S]+@[\S]+.[\S]+$")
+
+
 def valid_email(email):
-  return not email or EMAIL_RE.match(email)
+    return not email or EMAIL_RE.match(email)
 
 
 class Handler(webapp2.RequestHandler):
@@ -109,26 +117,48 @@ class Handler(webapp2.RequestHandler):
         uid = self.read_secure_cookie('user_id')
         self.user = uid and User.by_id(int(uid))
 
+    def check_if_valid_post(self, post_id):
+        key = db.Key.from_path("Blog", int(post_id), parent=blog_key())
+        post = db.get(key)
+        if not post:
+            return self.redirect("/blog/login")
+
+    def check_if_valid_comment(self, com_id):
+        key = db.Key.from_path("Comment", int(com_id), parent=comment_key())
+        comment = db.get(key)
+        if not comment:
+            return self.redirect("/blog/login")
+
+    def user_owns_post(self, post_id):
+        key = db.Key.from_path("Blog", int(post_id), parent=blog_key())
+        post = db.get(key)
+        return self.user.username == post.author
+
+    def user_owns_comment(self, com_id):
+        key = db.Key.from_path("Comment", int(com_id), parent=comment_key())
+        comment = db.get(key)
+        return self.user.username == comment.commenter
+
 
 # User parent
 def users_key(group='default'):
     return db.Key.from_path('users', group)
 
 
-### Entity kinds in the datastore ###
+# Entity kinds in the datastore
 class User(db.Model):
     '''Columns in User entity'''
-    username = db.StringProperty(required = True)
-    pw_hash = db.StringProperty(required = True)
+    username = db.StringProperty(required=True)
+    pw_hash = db.StringProperty(required=True)
     email = db.StringProperty()
 
     @classmethod
-    def register(cls, username, password, email = None):
+    def register(cls, username, password, email=None):
         pw_hash = make_pw_hash(username, password)
         return User(parent=users_key(),
-                    username = username,
-                    pw_hash = pw_hash,
-                    email = email)
+                    username=username,
+                    pw_hash=pw_hash,
+                    email=email)
 
     @classmethod
     def by_id(cls, uid):
@@ -144,12 +174,11 @@ def blog_key(name='default'):
 class Blog(db.Model):
     subject = db.StringProperty()
     content = db.TextProperty()
-    created = db.DateTimeProperty(auto_now_add = True)
-    last_modified = db.DateTimeProperty(auto_now = True)
+    created = db.DateTimeProperty(auto_now_add=True)
+    last_modified = db.DateTimeProperty(auto_now=True)
     author = db.StringProperty()
-    liked_by = db.ListProperty(str)
-    likes = db.IntegerProperty(required=True)
-
+    liked_by = db.ListProperty(str, default=None)
+    likes = db.IntegerProperty(required=True, default=0)
 
     def render_comments(self):
         comments = db.GqlQuery("select * from Comment order by created desc")
@@ -169,9 +198,10 @@ class Comment(db.Model):
     com_id = db.IntegerProperty()
     comment = db.TextProperty()
     post_id = db.IntegerProperty()
-    created = db.DateTimeProperty(auto_now_add = True)
-    commenter = db.StringProperty(required = True)
-    commenter_id = db.IntegerProperty(required = True)
+    created = db.DateTimeProperty(auto_now_add=True)
+    commenter = db.StringProperty(required=True)
+    commenter_id = db.IntegerProperty(required=True)
+
 
 # Create account for new users
 class Signup(Handler):
@@ -185,10 +215,10 @@ class Signup(Handler):
         verify = self.request.get('verify')
         email = self.request.get('email')
         user_exist = db.GqlQuery("select * from User where username=:1",
-                     username).get()
+                                 username).get()
 
-        d = dict(username = username,
-                      email = email)
+        d = dict(username=username,
+                 email=email)
 
         if not valid_username(username):
             d.update({'username_error': "That's not a valid username."})
@@ -213,9 +243,9 @@ class Signup(Handler):
         if have_error:
             self.render('signup.html', **d)
         else:
-            a = User.register(username = username,
-                              password = password,
-                              email = email)
+            a = User.register(username=username,
+                              password=password,
+                              email=email)
             a.put()
             self.login(a)
             self.redirect("/")
@@ -224,42 +254,40 @@ class Signup(Handler):
 class Welcome(Handler):
     def get(self):
         if self.user:
-            self.render("welcome.html", username = self.user.username)
+            self.render("welcome.html", username=self.user.username)
         else:
             self.redirect("/blog/login")
 
 
 class NewPost(Handler):
-    def render_front(self, subject = "", content = "", error = ""):
+    def render_front(self, subject="", content="", error=""):
         contents = db.GqlQuery("select * from Blog order by created desc")
 
-        self.render("new_post.html", subject = subject,
-                                     content = content,
-                                     error = error,
-                                     contents = contents)
+        self.render("new_post.html", subject=subject,
+                    content=content,
+                    error=error,
+                    contents=contents)
 
     def get(self):
         if not self.user:
-            self.redirect("/")
+            self.redirect("/blog/login")
         else:
             self.render_front()
 
     def post(self):
         if not self.user:
-            self.redirect("/")
+            self.redirect("/blog/login")
         else:
             author = self.user.username
             subject = self.request.get("subject")
             content = self.request.get("content")
-
+            # Check if the input is empty, if yes error will be displayed
             if (subject and content and
-                not (subject.isspace() or content.isspace())):
+                    not (subject.isspace() or content.isspace())):
                 b = Blog(parent=blog_key(),
-                         subject = subject,
-                         content = content,
-                         author = author,
-                         likes = 0,
-                         liked_by = [])
+                         subject=subject,
+                         content=content,
+                         author=author)
                 b.put()
                 post_id = b.key().id()
                 self.redirect("/blog/%d" % post_id)
@@ -270,70 +298,85 @@ class NewPost(Handler):
 
 class Single_Post(Handler):
     def get(self, post_id):
-        b = Blog.get_by_id(int(post_id), parent = blog_key())
+        self.check_if_valid_post(post_id)
+        b = Blog.get_by_id(int(post_id), parent=blog_key())
         if not b:
             self.error(404)
             return
         comments = b.render_comments()
-        self.render("single_post.html", subject = b.subject,
-                                        content = b.content,
-                                        created = b.created,
-                                        author = b.author,
-                                        comments = comments,
-                                        b = b,)
+        self.render("single_post.html", comments=comments,
+                    b=b,)
 
 
 class EditPost(Handler):
     def get(self, post_id):
+        self.check_if_valid_post(post_id)
         if not self.user:
             self.redirect("/blog/login")
         else:
-            b = Blog.get_by_id(int(post_id), parent = blog_key())
-            error = ""
-            self.render("edit_post.html", subject = b.subject,
-                                          content = b.content,
-                                          author = b.author,
-                                          error=error,
-                                          post_id = post_id)
+            if self.user_owns_post(post_id):
+                b = Blog.get_by_id(int(post_id), parent=blog_key())
+                error = ""
+                self.render("edit_post.html", b=b,
+                            error=error,
+                            post_id=post_id)
+            else:
+                not_post_owner_error = ("error: You can only edit/delete \
+                                        your own posts!")
+                b = Blog.get_by_id(int(post_id), parent=blog_key())
+                comments = b.render_comments()
+                self.render("single_post.html", comments=comments,
+                            not_post_owner_error=not_post_owner_error,
+                            b=b)
 
     def post(self, post_id):
+        self.check_if_valid_post(post_id)
         if not self.user:
             self.redirect("/blog/login")
         else:
-            p = Blog.get_by_id(int(post_id), parent = blog_key())
-            p.subject = self.request.get("subject")
-            p.content = self.request.get("content")
-            if not (p.subject and p.content and
-                not (p.subject.isspace() or p.content.isspace())):
+            b = Blog.get_by_id(int(post_id), parent=blog_key())
+            b.subject = self.request.get("subject")
+            b.content = self.request.get("content")
+            # Check if the input is empty, if yes error will be displayed
+            if not (b.subject and b.content and
+                    not (b.subject.isspace() or b.content.isspace())):
                 error = "Error: We need both a subject, and some content!"
-                self.render("edit_post.html", subject = p.subject,
-                                              content = p.content,
-                                              author = p.author,
-                                              error = error)
+                self.render("edit_post.html", b=b,
+                                              error=error)
             else:
-                p.put()
+                b.put()
                 time.sleep(0.1)
-                self.redirect('/blog/%s' % str(p.key().id()))
+                self.redirect('/blog/%s' % str(b.key().id()))
 
 
 class DeletePost(Handler):
     def get(self, post_id):
+        self.check_if_valid_post(post_id)
         if not self.user:
             self.redirect("/blog/login")
         else:
-            key = db.Key.from_path("Blog", int(post_id), parent=blog_key())
-            content = db.get(key)
-            content.delete()
-            time.sleep(0.1)
-            self.redirect("/blog")
+            if self.user_owns_post(post_id):
+                key = db.Key.from_path("Blog", int(post_id), parent=blog_key())
+                content = db.get(key)
+                content.delete()
+                time.sleep(0.1)
+                self.redirect("/blog")
+            else:
+                not_post_owner_error = "error: You can only edit/delete \
+                                       your own posts!"
+                b = Blog.get_by_id(int(post_id), parent=blog_key())
+                comments = b.render_comments()
+                self.render("single_post.html", comments=comments,
+                            not_post_owner_error=not_post_owner_error,
+                            b=b)
 
 
 class HomePage(Handler):
     def get(self):
         contents = db.GqlQuery("select * from Blog order by created desc")
         comments = db.GqlQuery("select * from Comment order by created desc")
-        self.render("all_posts.html", contents = contents,
-                                      comments = comments)
+        self.render("all_posts.html", contents=contents,
+                    comments=comments)
 
 
 class Login(Handler):
@@ -344,12 +387,12 @@ class Login(Handler):
         username = self.request.get("username")
         password = self.request.get("password")
         user_exist = db.GqlQuery("select * from User where username=:1",
-                     username).get()
+                                 username).get()
         if (user_exist and valid_pw(username, password, user_exist.pw_hash)):
             self.login(user_exist)
             self.redirect('/')
         else:
-            self.render("login.html", login_error = "Invalid login")
+            self.render("login.html", login_error="Invalid login")
 
 
 class Logout(Handler):
@@ -363,18 +406,28 @@ class Like(Handler):
         if not self.user:
             self.redirect("/blog/login")
         else:
-            key = db.Key.from_path('Blog', int(post_id), parent=blog_key())
-            content = db.get(key)
-            current_user = self.user.username
-            content.likes = content.likes + 1
-            content.liked_by.append(current_user)
-            content.put()
-            time.sleep(0.1)
-            self.redirect("/blog/%s" % post_id)
+            self.check_if_valid_post(post_id)
+            if self.user_owns_post(post_id):
+                like_error = "error: You can not like your own posts!"
+                b = Blog.get_by_id(int(post_id), parent=blog_key())
+                comments = b.render_comments()
+                self.render("single_post.html", comments=comments,
+                            like_error=like_error,
+                            b=b)
+            else:
+                key = db.Key.from_path('Blog', int(post_id), parent=blog_key())
+                content = db.get(key)
+                current_user = self.user.username
+                content.likes = content.likes + 1
+                content.liked_by.append(current_user)
+                content.put()
+                time.sleep(0.1)
+                self.redirect("/blog/%s" % post_id)
 
 
 class UnLike(Handler):
     def get(self, post_id):
+        self.check_if_valid_post(post_id)
         if not self.user:
             self.redirect("/blog/login")
         else:
@@ -394,6 +447,7 @@ class UnLike(Handler):
 
 class CommentHandler(Handler):
     def post(self, post_id):
+        self.check_if_valid_post(post_id)
         if not self.user:
             self.redirect("/blog/login")
         else:
@@ -401,17 +455,14 @@ class CommentHandler(Handler):
             commenter = self.user.username
             comment = self.request.get("comment")
             post_id = int(post_id)
+            # Check if the input is empty, if yes error will be displayed
             if not comment or comment.isspace():
-                b = Blog.get_by_id(int(post_id), parent = blog_key())
+                b = Blog.get_by_id(int(post_id), parent=blog_key())
                 comments = b.render_comments()
                 error = "error: We need some content for the comment!!!"
-                self.render("single_post.html", subject = b.subject,
-                                                content = b.content,
-                                                created = b.created,
-                                                author = b.author,
-                                                comments = comments,
-                                                b = b,
-                                                error = error)
+                self.render("single_post.html", comments=comments,
+                            b=b,
+                            error=error)
             else:
                 c = Comment(parent=comment_key(),
                             commenter_id=commenter_id,
@@ -427,51 +478,70 @@ class CommentHandler(Handler):
 
 class DeleteComment(Handler):
     def post(self, post_id, com_id):
+        self.check_if_valid_post(post_id)
+        self.check_if_valid_comment(com_id)
         if not self.user:
             self.redirect("/blog/login")
         else:
             com_id = int(com_id)
-            commenter_id = int(self.request.get("commenter_id"))
             post_id = self.request.get("post_id")
-            user_id = self.user.key().id()
 
-            if(commenter_id == user_id):
+            if self.user_owns_comment(com_id):
                 key = db.Key.from_path("Comment", com_id, parent=comment_key())
                 comment = db.get(key)
                 comment.delete()
                 time.sleep(0.1)
                 self.redirect(("/blog/%s" % str(post_id)))
             else:
-                time.sleep(0.1)
-                self.redirect("/blog/%s" % str(post_id))
+                not_owner_error = "error: You can only edit/delete \
+                                  your own comments!"
+                b = Blog.get_by_id(int(post_id), parent=blog_key())
+                comments = b.render_comments()
+                self.render("single_post.html", comments=comments,
+                            not_owner_error=not_owner_error,
+                            b=b)
 
 
 class EditComment(Handler):
     def get(self, post_id, com_id):
-        post = Blog.get_by_id(int(post_id), parent=blog_key())
-        comment = Comment.get_by_id(int(com_id), parent = comment_key())
-        if comment:
-            error = ""
-            self.render("edit_comment.html", subject=post.subject,
-                                             content=post.content,
-                                             comment=comment.comment,
-                                             created = comment.created,
-                                             error = error,
-                                             post_id = post_id)
+        self.check_if_valid_post(post_id)
+        self.check_if_valid_comment(com_id)
+        if not self.user:
+            self.redirect("/blog/login")
         else:
-            self.redirect("/blog/%s" % str(post_id))
+            b = Blog.get_by_id(int(post_id), parent=blog_key())
+            comment = Comment.get_by_id(int(com_id), parent=comment_key())
+            if self.user_owns_comment(com_id):
+                if comment:
+                    error = ""
+                    self.render("edit_comment.html", b=b,
+                                comment=comment.comment,
+                                created=comment.created,
+                                error=error,
+                                post_id=post_id)
+                else:
+                    self.redirect("/blog/%s" % str(post_id))
+            else:
+                comments = b.render_comments()
+                not_owner_error = "error: You can only edit/delete \
+                                  your own comments!"
+                self.render("single_post.html", comments=comments,
+                            not_owner_error=not_owner_error,
+                            b=b,)
 
     def post(self, post_id, com_id):
-        comment = Comment.get_by_id(int(com_id), parent = comment_key())
-        post = Blog.get_by_id(int(post_id), parent=blog_key())
+        self.check_if_valid_post(post_id)
+        self.check_if_valid_comment(com_id)
+        comment = Comment.get_by_id(int(com_id), parent=comment_key())
+        b = Blog.get_by_id(int(post_id), parent=blog_key())
         comment.comment = self.request.get("comment")
+        # Check if the input is empty, if yes error will be displayed
         if not comment.comment or comment.comment.isspace():
             error = "error: We need some content for the comment!!!"
-            self.render("edit_comment.html", subject=post.subject,
-                                             content=post.content,
-                                             comment=comment.comment,
-                                             created = comment.created,
-                                             error = error)
+            self.render("edit_comment.html", b=b,
+                        comment=comment.comment,
+                        created=comment.created,
+                        error=error)
         else:
             comment.put()
             time.sleep(0.1)
@@ -492,7 +562,9 @@ app = webapp2.WSGIApplication([("/signup", Signup),
                                (r"/blog/([0-9]+)/like", Like),
                                (r"/blog/([0-9]+)/unlike", UnLike),
                                (r"/blog/([0-9]+)/comment", CommentHandler),
-                               (r"/blog/([0-9]+)/deletecomment/([0-9]+)", DeleteComment),
-                               (r"/blog/([0-9]+)/editcomment/([0-9]+)", EditComment)],
-                               debug = True)
-
+                               (r"/blog/([0-9]+)/deletecomment/([0-9]+)",
+                                DeleteComment),
+                               (r"/blog/([0-9]+)/editcomment/([0-9]+)",
+                                EditComment)
+                               ],
+                              debug=True)

@@ -6,12 +6,12 @@
 
     <div class="heading">
         <div class="subject">
-            <em>Subject:</em> {{subject}}
+            <em>Subject:</em> {{b.subject}}
             <br>
-            <em>Author:</em> {{author}}
+            <em>Author:</em> {{b.author}}
         </div>
         <div class="opac created">
-            {{created.strftime("%b %d, %Y")}}
+            {{b.created.strftime("%b %d, %Y")}}
         </div>
         <hr>
     </div>
@@ -19,11 +19,14 @@
 
     <div class="content">
         <p>
-            {{content}}
+            {{b.content}}
         </p>
        <div align = "right">
-            {% if user.username == author %}
-
+               <div class="error">
+                    {{not_post_owner_error}}
+                    {{like_error}}
+                </div>
+                <br>
                 <a href="/blog/{{b.key().id()}}/editpost"
                    class="button">
                     Edit post
@@ -32,9 +35,6 @@
                    class="button">
                     Delete post
                 </a>
-
-            {% else %}
-
                 {% if user.username not in b.liked_by %}
 
                     <a href="/blog/{{b.key().id()}}/like"
@@ -51,12 +51,11 @@
 
                 {% endif %}
 
-            {% endif %}
-
             <p class="opac">
                 Number of likes: {{b.likes}}
             </p>
         </div>
+
         <label>
             Write a comment:
         </label>
@@ -76,6 +75,9 @@
         </div>
 
         <div class="comments">
+        <div class="error">{{not_owner_error}}</div>
+        <hr>
+        <hr>
             {% for comment in comments %}
 
                 {% if comment.post_id == b.key().id() %}
@@ -91,9 +93,6 @@
                         <br>
                         on: {{comment.created.strftime("%b %d, %Y")}}
                     </p>
-                        <!-- If current user = comment author: -->
-                        {% if user.username == comment.commenter %}
-
                             <!-- URLs on a single line for more readability -->
                             <a href="/blog/{{b.key().id()}}/editcomment/{{comment.key().id()}}"
                                class="buttons">
@@ -114,8 +113,6 @@
                                        value="Delete Comment"
                                        class="buttons">
                             </form>
-
-                        {% endif %}
                     <hr>
                     <hr>
 

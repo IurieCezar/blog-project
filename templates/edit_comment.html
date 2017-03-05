@@ -5,9 +5,9 @@
     <div class="single-post">
         <div class="heading">
             <div class="subject">
-                <em>Subject:</em> {{subject}}
+                <em>Subject:</em> {{b.subject}}
                 <br>
-                <em>Author:</em> {{author}}
+                <em>Author:</em> {{b.author}}
             </div>
             <div class="created">
                 {{created.strftime("%b %d, %Y")}}
@@ -15,7 +15,7 @@
             <hr>
         </div class="content">
             <p>
-                {{content}}
+                {{b.content}}
             </p>
         </div>
         <label>Edit comment:</label>

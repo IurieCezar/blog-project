@@ -7,17 +7,17 @@
 
 <form method="post">
     <label>
-        <div>Author: {{author}}</div>
+        <div>Author: {{b.author}}</div>
         <div>Subject:</div>
         <input type="text"
                name="subject"
-               value="{{subject}}">
+               value="{{b.subject}}">
     </label>
 
     <label>
         <div>content</div>
     </label>
-    <textarea name="content">{{content}}</textarea>
+    <textarea name="content">{{b.content}}</textarea>
 
     <div class="error">{{error}}</div>
 

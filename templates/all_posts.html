@@ -30,8 +30,6 @@
         {{content.content}}
     </div>
     <div align = "right">
-        {% if user.username == content.author %}
-
             <a href="/blog/{{content.key().id()}}/editpost"
                class="button">
                 Edit post
@@ -40,9 +38,6 @@
                class="button">
                 Delete post
             </a>
-
-        {% else %}
-
             {% if user.username not in content.liked_by %}
 
                 <a href="/blog/{{content.key().id()}}/like"
@@ -58,8 +53,6 @@
                 </a>
 
             {% endif %}
-
-        {% endif %}
         <p class="opac">
             Number of likes: {{content.likes}}&nbsp;&nbsp;
         </p>
@@ -91,8 +84,6 @@
                     <br>
                     on: {{comment.created.strftime("%b %d, %Y")}}
                 </p>
-                {% if user.username == comment.commenter%}
-
                     <!-- URLs on a single line for more readability -->
                     <a href="/blog/{{content.key().id()}}/editcomment/{{comment.key().id()}}"
                        class="buttons">
@@ -113,8 +104,6 @@
                                value="Delete Comment"
                                class="buttons">
                     </form>
-
-                {% endif %}
         <hr>
         <hr>
 
