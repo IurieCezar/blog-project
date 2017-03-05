@@ -1,6 +1,8 @@
 # blog-project
-
 A multi-user blog developed using Google App Engine.
+
+Live version: [https://blogbyiurie.appspot.com/blog](https://blogbyiurie.appspot.com/blog)
+
 
 ## Getting Started
 ### Prerequisites
