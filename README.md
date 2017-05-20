@@ -38,6 +38,7 @@ To deploy the app to App Engine you will need to:
 
 * [Webapp2](https://webapp2.readthedocs.io/en/latest/) - The web framework used
 * [Jinja2](http://jinja.pocoo.org/) - Template Engine for python
+* [Google App Engine](https://cloud.google.com/appengine/)
 
 ## Authors
 
