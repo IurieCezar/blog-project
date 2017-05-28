@@ -31,7 +31,7 @@ To deploy the app to App Engine you will need to:
 * [An App Engine application](https://cloud.google.com/appengine/docs/standard/python/console/#create)
 * Run the `gcloud app deploy app.yaml` command from within the root directory of your application where the configuration files(app.yaml, index.yaml) are located.
 
-###Optional flags:
+### Optional flags:
 * Include the `--project` flag to specify an alternate Cloud Platform project ID to what you initialized as the default in the gcloud tool. Example: `--project [YOUR_PROJECT_ID]`
 * Include the -v flag to specify a version ID, otherwise one is generated for you. Example: -v [YOUR_VERSION_ID]
 
