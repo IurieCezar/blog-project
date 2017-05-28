@@ -1,4 +1,4 @@
-# Multi User Blog
+# Multi-User Blog
 A multi-user blog developed using Google App Engine.
 
 ## Complete URL
@@ -38,7 +38,7 @@ To deploy the app to App Engine you will need to:
 ## Built With
 
 * [Webapp2](https://webapp2.readthedocs.io/en/latest/) - The web framework used
-* [Jinja2](http://jinja.pocoo.org/) - Template Engine for python
+* [Jinja2](http://jinja.pocoo.org/) - Template Engine for Python
 * [Google App Engine](https://cloud.google.com/appengine/)
 
 ## Authors
