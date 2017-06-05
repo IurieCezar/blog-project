@@ -1,5 +1,7 @@
 # Multi-User Blog
-A multi-user blog developed using Google App Engine.
+
+A multi-user blog developed using Webapp2, Jinja2 and Google App Engine. Users can sign in and post blog posts as
+well as 'Like' and 'Comment' on other posts.
 
 <img width="1420" alt="blog" src="https://cloud.githubusercontent.com/assets/19762832/26764989/9f8458a6-4937-11e7-8ec4-a67268f9ede3.png">
 
