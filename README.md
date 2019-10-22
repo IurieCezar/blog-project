@@ -16,7 +16,7 @@ install [Google App Engine SDK](https://cloud.google.com/appengine/docs/standard
 
 ### How to run the project
 * Clone the repository to your local machine:
-`git clone https://github.com/IurieCezar/blog-project`
+`git clone https://github.com/iuriepopovici/blog-project`
 * Navigate to the directory that contains the code:
 `cd blog-project`
 * From within the project directory, start the local development server with the following command:
