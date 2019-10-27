@@ -32,7 +32,7 @@ in your source files and reloads them if necessary. Reload [http://localhost:808
 To deploy the app to App Engine you will need to:
 * [Create a google account](https://accounts.google.com/SignUp?hl=en)
 * [Create a project](https://cloud.google.com/appengine/docs/standard/python/console/#create)
-* [An App Engine application](https://cloud.google.com/appengine/docs/standard/python/console/#create)
+* [Create an App Engine application](https://cloud.google.com/appengine/docs/standard/python/console/#create)
 * Run the `gcloud app deploy app.yaml` command from within the root directory of your application where the configuration files(app.yaml, index.yaml) are located.
 
 ### Optional flags:
